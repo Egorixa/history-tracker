@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: history_db
+    environment:
+      POSTGRES_USER: history
+      POSTGRES_PASSWORD: history
+      POSTGRES_DB: history
+    ports:
+      - "5433:5432"
+    volumes:
+      - history_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U history -d history"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  history_pg:

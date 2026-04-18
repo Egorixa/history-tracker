@@ -1,0 +1,16 @@
+bin/
+obj/
+out/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+.DS_Store
+*.log
+appsettings.*.Local.json
+TestResults/
+coverage/
+reference_repo/
+node_modules/
+dist/
