@@ -1,5 +1,3 @@
-// ChannelMember — связка «пользователь подписан/добавлен в канал».
-// Владелец в этой таблице не хранится — он задан через Channel.OwnerId.
 namespace Core.Entities;
 
 public class ChannelMember

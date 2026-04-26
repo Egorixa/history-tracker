@@ -1,5 +1,3 @@
-// ChannelEndpoints — /api/v1/channels: CRUD, /my, /public, subscribe на public,
-// добавление/удаление members (инвайты в приватные).
 using Api.Auth;
 using Api.Dtos;
 using Api.Services;

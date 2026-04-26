@@ -1,5 +1,3 @@
-// DTO records для входа/выхода всех эндпойнтов. Отделены от доменных entities,
-// чтобы контракт API не ломался при изменении модели БД.
 using Core.Entities;
 
 namespace Api.Dtos;
@@ -25,10 +23,20 @@ public record CreateVisitRequest(string Url, string? Title, List<Guid> ChannelId
 public record VisitResponse(
     long Id,
     Guid UserId,
+    string UserUsername,
     Guid ChannelId,
     string Url,
     string? Title,
     DateTimeOffset VisitedAt);
+
+public record CreatePostRequest(string Body);
+public record PostResponse(
+    Guid Id,
+    Guid ChannelId,
+    Guid AuthorId,
+    string AuthorUsername,
+    string Body,
+    DateTimeOffset CreatedAt);
 
 public record LookupRequest(List<string> Urls);
 public record LookupVisitor(

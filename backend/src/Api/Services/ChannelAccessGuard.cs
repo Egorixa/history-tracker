@@ -1,5 +1,3 @@
-// ChannelAccessGuard — единая точка проверки прав на канал (read / owner / список
-// читаемых каналов). Используется из visits и lookup, чтобы не дублировать логику.
 using Core.Entities;
 using Data;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,3 @@
-// VisitEndpoints — POST /visits (постит может только владелец канала) и чтение ленты канала.
-// URL нормализуется и хэшируется перед вставкой.
 using Api.Auth;
 using Api.Dtos;
 using Api.Services;
@@ -61,7 +59,8 @@ public static class VisitEndpoints
             var q = db.Visits.AsNoTracking().Where(v => v.ChannelId == id);
             if (before is not null) q = q.Where(v => v.VisitedAt < before);
             var items = await q.OrderByDescending(v => v.VisitedAt).Take(take)
-                .Select(v => new VisitResponse(v.Id, v.UserId, v.ChannelId, v.Url, v.Title, v.VisitedAt))
+                .Select(v => new VisitResponse(
+                    v.Id, v.UserId, v.User!.Username, v.ChannelId, v.Url, v.Title, v.VisitedAt))
                 .ToListAsync(ct);
             return Results.Ok(items);
         });

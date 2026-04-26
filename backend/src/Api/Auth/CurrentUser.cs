@@ -1,4 +1,3 @@
-// CurrentUser — helper для доставания Guid пользователя из ClaimsPrincipal в эндпойнтах.
 using System.Security.Claims;
 
 namespace Api.Auth;

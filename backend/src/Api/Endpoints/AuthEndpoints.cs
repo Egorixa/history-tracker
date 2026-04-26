@@ -1,5 +1,3 @@
-// AuthEndpoints — /api/v1/auth: register, login, rotate-token.
-// Пароли хранятся BCrypt-хэшем, api_token — долгоживущий (пользователь может ротировать).
 using Api.Auth;
 using Api.Dtos;
 using Core.Entities;

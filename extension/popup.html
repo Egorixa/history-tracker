@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+  <title>History Tracker</title>
+</head>
+<body>
+  <header>
+    <h1>History Tracker</h1>
+    <div id="user-badge" class="user-badge hidden"></div>
+  </header>
+
+  <section id="auth-section">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="login">Войти</button>
+      <button class="tab-btn" data-tab="register">Регистрация</button>
+    </div>
+    <form id="auth-form">
+      <label>Адрес API
+        <input type="url" id="api-base" placeholder="http://localhost:5000" required>
+      </label>
+      <label>Логин
+        <input type="text" id="username" autocomplete="username" required minlength="3" maxlength="64">
+      </label>
+      <label>Пароль
+        <input type="password" id="password" autocomplete="current-password" required minlength="6">
+      </label>
+      <button type="submit" id="auth-submit">Войти</button>
+      <p class="error" id="auth-error"></p>
+    </form>
+  </section>
+
+  <section id="main-section" class="hidden">
+    <h2>Мои каналы (автопостинг)</h2>
+    <p class="hint">Визиты автоматически уходят только в отмеченные каналы, которыми вы владеете.</p>
+    <div id="channel-list" class="channel-list"></div>
+    <div class="create-channel">
+      <input type="text" id="new-channel-name" placeholder="Название нового канала" maxlength="128">
+      <select id="new-channel-visibility">
+        <option value="0">Публичный</option>
+        <option value="1">Приватный</option>
+      </select>
+      <button type="button" id="new-channel-create">Создать</button>
+    </div>
+
+    <h2>Подписки</h2>
+    <p class="hint">Каналы других людей, чьи визиты вы видите подсветкой на страницах.</p>
+    <div id="subscribed-list" class="channel-list"></div>
+
+    <h2>Найти публичные каналы</h2>
+    <div class="discover-row">
+      <input type="text" id="discover-query" placeholder="Поиск по названию…" maxlength="64">
+      <button type="button" id="discover-search">Искать</button>
+    </div>
+    <div id="discover-list" class="channel-list"></div>
+
+    <h2>Чёрный список</h2>
+    <p class="hint">URL, попадающие под эти хосты или префиксы, никогда не отправляются.</p>
+    <textarea id="blacklist" rows="5" placeholder="localhost&#10;mail.google.com"></textarea>
+
+    <div class="row">
+      <button type="button" id="open-feed">Открыть ленту</button>
+    </div>
+    <div class="row">
+      <button type="button" id="save">Сохранить</button>
+      <button type="button" id="logout" class="secondary">Выйти</button>
+    </div>
+    <p class="status" id="status"></p>
+  </section>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

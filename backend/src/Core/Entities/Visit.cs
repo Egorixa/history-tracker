@@ -1,5 +1,3 @@
-// Visit — одна запись о посещении URL одним пользователем в одном канале.
-// UrlHash (SHA-256) — то, по чему ищем посетителей страницы.
 namespace Core.Entities;
 
 public class Visit

@@ -1,5 +1,3 @@
-// Channel — «лента» пользователя. Публичные видят все, приватные — только участники.
-// Постить визиты в канал может только его владелец.
 namespace Core.Entities;
 
 public class Channel
@@ -14,4 +12,5 @@ public class Channel
 
     public ICollection<ChannelMember> Members { get; set; } = new List<ChannelMember>();
     public ICollection<Visit> Visits { get; set; } = new List<Visit>();
+    public ICollection<Post> Posts { get; set; } = new List<Post>();
 }

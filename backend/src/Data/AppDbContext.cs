@@ -1,5 +1,3 @@
-// AppDbContext — EF Core контекст и единственная точка маппинга entities на PostgreSQL.
-// Таблицы и колонки — в snake_case, индексы заложены под основные запросы (lookup по url_hash).
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Channel> Channels => Set<Channel>();
     public DbSet<ChannelMember> ChannelMembers => Set<ChannelMember>();
     public DbSet<Visit> Visits => Set<Visit>();
+    public DbSet<Post> Posts => Set<Post>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -86,6 +85,26 @@ public class AppDbContext : DbContext
             e.HasIndex(x => new { x.UrlHash, x.ChannelId });
             e.HasIndex(x => new { x.UserId, x.VisitedAt });
             e.HasIndex(x => x.ChannelId);
+        });
+
+        b.Entity<Post>(e =>
+        {
+            e.ToTable("posts");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.ChannelId).HasColumnName("channel_id");
+            e.Property(x => x.AuthorId).HasColumnName("author_id");
+            e.Property(x => x.Body).HasColumnName("body").HasMaxLength(4096).IsRequired();
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.HasOne(x => x.Channel)
+                .WithMany(c => c.Posts)
+                .HasForeignKey(x => x.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Author)
+                .WithMany()
+                .HasForeignKey(x => x.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.ChannelId, x.CreatedAt });
         });
     }
 }

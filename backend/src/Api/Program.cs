@@ -1,5 +1,3 @@
-// Program.cs — точка входа API: конфиг EF/Serilog/Swagger/CORS/Auth, применение миграций
-// в Development и регистрация всех групп эндпойнтов.
 using Api.Auth;
 using Api.Endpoints;
 using Api.Services;
@@ -88,6 +86,7 @@ app.MapGet("/healthz", () => Results.Ok(new { status = "ok" })).AllowAnonymous()
 app.MapAuthEndpoints();
 app.MapChannelEndpoints();
 app.MapVisitEndpoints();
+app.MapPostEndpoints();
 app.MapLookupEndpoints();
 
 app.Run();

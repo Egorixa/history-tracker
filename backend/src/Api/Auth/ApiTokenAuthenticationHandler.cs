@@ -1,5 +1,3 @@
-// ApiTokenAuthenticationHandler — кастомная схема аутентификации: читает заголовок
-// Authorization: Bearer <token>, ищет в таблице users и кладёт uid-claim в принципала.
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Data;

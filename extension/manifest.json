@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "History Tracker",
+  "version": "0.1.0",
+  "description": "Делитесь историей посещений в каналах и смотрите, где побывали ваши друзья.",
+  "permissions": ["storage", "tabs", "webNavigation"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "History Tracker"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["url_normalizer.js", "content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

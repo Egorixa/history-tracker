@@ -1,0 +1,111 @@
+* { box-sizing: border-box; }
+
+body {
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  width: 340px;
+  margin: 0;
+  padding: 12px;
+  color: #1e1e2e;
+  background: #fff;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+h1 { font-size: 16px; margin: 0; }
+h2 { font-size: 13px; margin: 14px 0 6px; color: #444; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.hidden { display: none !important; }
+
+.user-badge {
+  font-size: 11px;
+  background: #eef0ff;
+  color: #3f4bd8;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.hint { color: #777; font-size: 11px; margin: 0 0 6px; }
+.error { color: #c23a3a; font-size: 12px; min-height: 16px; margin: 6px 0 0; }
+.status { color: #3f8a3a; font-size: 12px; min-height: 16px; margin: 6px 0 0; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.tab-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #d0d0d8;
+  background: #f6f6fa;
+  color: #444;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.tab-btn.active { background: #5e81ff; border-color: #5e81ff; color: #fff; }
+
+form label { display: block; font-size: 12px; color: #555; margin-bottom: 6px; }
+form input, textarea, select {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d0d0d8;
+  border-radius: 6px;
+  font: inherit;
+  margin-top: 2px;
+}
+
+button {
+  padding: 7px 10px;
+  border: 0;
+  background: #5e81ff;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button.secondary { background: #eee; color: #333; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.channel-list {
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 4px;
+  margin-bottom: 6px;
+}
+.channel-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; font-size: 12px; }
+.channel-item .channel-meta { margin-left: auto; color: #999; font-size: 10px; text-transform: uppercase; }
+.channel-empty { padding: 8px; color: #999; font-size: 12px; text-align: center; }
+
+.create-channel {
+  display: grid;
+  grid-template-columns: 1fr 90px 70px;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.create-channel input, .create-channel select { margin: 0; }
+
+.discover-row {
+  display: grid;
+  grid-template-columns: 1fr 70px;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.discover-row input { margin: 0; }
+
+.channel-item button.inline {
+  padding: 2px 8px;
+  font-size: 11px;
+  margin-left: auto;
+}
+.channel-item button.inline.secondary { background: #eee; color: #333; }
+
+textarea { resize: vertical; font-family: ui-monospace, monospace; font-size: 11px; }
+
+.row { display: flex; gap: 6px; margin-top: 8px; }
+.row button { flex: 1; }

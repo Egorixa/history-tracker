@@ -12,5 +12,6 @@ appsettings.*.Local.json
 TestResults/
 coverage/
 reference_repo/
+archive_files/
 node_modules/
 dist/
