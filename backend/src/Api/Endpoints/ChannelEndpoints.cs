@@ -120,6 +120,22 @@ public static class ChannelEndpoints
             return Results.NoContent();
         });
 
+        group.MapGet("/{id:guid}/members", async (Guid id, HttpContext ctx, AppDbContext db, CancellationToken ct) =>
+        {
+            var userId = CurrentUser.GetId(ctx.User);
+            var ch = await db.Channels.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
+            if (ch is null) return Results.NotFound();
+            if (ch.OwnerId != userId) return Results.Forbid();
+
+            var members = await db.ChannelMembers.AsNoTracking()
+                .Where(m => m.ChannelId == id)
+                .Include(m => m.User)
+                .OrderBy(m => m.JoinedAt)
+                .Select(m => new ChannelMemberResponse(m.UserId, m.User!.Username, m.JoinedAt))
+                .ToListAsync(ct);
+            return Results.Ok(members);
+        });
+
         group.MapPost("/{id:guid}/members", async (Guid id, AddMemberRequest req, HttpContext ctx, AppDbContext db, CancellationToken ct) =>
         {
             var userId = CurrentUser.GetId(ctx.User);

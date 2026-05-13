@@ -18,6 +18,7 @@ public record ChannelResponse(
     string Role);
 
 public record AddMemberRequest(string Username);
+public record ChannelMemberResponse(Guid UserId, string Username, DateTimeOffset JoinedAt);
 
 public record CreateVisitRequest(string Url, string? Title, List<Guid> ChannelIds);
 public record VisitResponse(
