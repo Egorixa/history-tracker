@@ -11,18 +11,24 @@ async function clientForWindow(windowId) {
   return { api: new ApiClient(cfg.apiBase, cfg.apiToken), cfg };
 }
 
-function isBlacklisted(url, blacklist) {
+function matchesRules(host, full, rules) {
+  return rules.some((rule) => {
+    const r = rule.toLowerCase();
+    return host === r || host.endsWith("." + r) || full.startsWith(r);
+  });
+}
+
+function isAllowedForAutopost(url, blacklist, whitelist) {
   try {
     const u = new URL(url);
-    if (u.protocol !== "http:" && u.protocol !== "https:") return true;
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
     const host = u.host.toLowerCase();
     const full = host + u.pathname;
-    return blacklist.some((rule) => {
-      const r = rule.toLowerCase();
-      return host === r || host.endsWith("." + r) || full.startsWith(r);
-    });
-  } catch {
+    if (whitelist && whitelist.length > 0 && !matchesRules(host, full, whitelist)) return false;
+    if (matchesRules(host, full, blacklist || [])) return false;
     return true;
+  } catch {
+    return false;
   }
 }
 
@@ -43,7 +49,7 @@ async function recordVisit(url, title, windowId) {
   if (!bundle) return;
   const { api, cfg } = bundle;
   if (!cfg.autopostChannels || cfg.autopostChannels.length === 0) return;
-  if (isBlacklisted(url, cfg.blacklist)) return;
+  if (!isAllowedForAutopost(url, cfg.blacklist, cfg.whitelist)) return;
   if (shouldDebounce(`${windowId}:${url}`)) return;
 
   try {

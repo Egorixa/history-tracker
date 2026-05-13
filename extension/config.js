@@ -3,6 +3,7 @@ export const DEFAULT_API_BASE = 'http://89.169.182.64:5000';
 export const SHARED_KEYS = {
     apiBase: 'apiBase',
     blacklist: 'blacklist',
+    whitelist: 'whitelist',
 };
 
 export const DEFAULT_BLACKLIST = [
@@ -38,6 +39,7 @@ export async function getConfig(windowId) {
     const keys = [
         SHARED_KEYS.apiBase,
         SHARED_KEYS.blacklist,
+        SHARED_KEYS.whitelist,
         pk.apiToken,
         pk.userId,
         pk.username,
@@ -52,6 +54,7 @@ export async function getConfig(windowId) {
         username: d[pk.username] || null,
         autopostChannels: d[pk.autopostChannels] || [],
         blacklist: d[SHARED_KEYS.blacklist] ?? DEFAULT_BLACKLIST,
+        whitelist: d[SHARED_KEYS.whitelist] ?? [],
     };
 }
 
@@ -79,11 +82,15 @@ export async function clearAuth(windowId) {
     ]);
 }
 
-export async function saveSettings(windowId, { autopostChannels, blacklist }) {
+export async function saveSettings(
+    windowId,
+    { autopostChannels, blacklist, whitelist },
+) {
     const pk = perWindowKeys(windowId);
     const set = {};
     if (autopostChannels !== undefined)
         set[pk.autopostChannels] = autopostChannels;
     if (blacklist !== undefined) set[SHARED_KEYS.blacklist] = blacklist;
+    if (whitelist !== undefined) set[SHARED_KEYS.whitelist] = whitelist;
     await chrome.storage.local.set(set);
 }

@@ -41,10 +41,10 @@ export class ApiClient {
     return this._fetch(`/api/v1/channels/public${q}`);
   }
 
-  createChannel(name, description, visibility) {
+  createChannel(name, description, visibility, isGroup = false) {
     return this._fetch("/api/v1/channels", {
       method: "POST",
-      body: JSON.stringify({ name, description, visibility })
+      body: JSON.stringify({ name, description, visibility, isGroup })
     });
   }
 
@@ -53,6 +53,21 @@ export class ApiClient {
   }
 
   unsubscribe(channelId, userId) {
+    return this._fetch(`/api/v1/channels/${channelId}/members/${userId}`, { method: "DELETE" });
+  }
+
+  listMembers(channelId) {
+    return this._fetch(`/api/v1/channels/${channelId}/members`);
+  }
+
+  addMember(channelId, username) {
+    return this._fetch(`/api/v1/channels/${channelId}/members`, {
+      method: "POST",
+      body: JSON.stringify({ username })
+    });
+  }
+
+  removeMember(channelId, userId) {
     return this._fetch(`/api/v1/channels/${channelId}/members/${userId}`, { method: "DELETE" });
   }
 

@@ -4,6 +4,8 @@ import {
   DEFAULT_API_BASE, DEFAULT_BLACKLIST
 } from "./config.js";
 
+const openMemberPanels = new Set();
+
 const $ = (id) => document.getElementById(id);
 
 const authSection = $("auth-section");
@@ -37,6 +39,7 @@ async function showMain(cfg) {
   userBadge.classList.remove("hidden");
 
   $("blacklist").value = (cfg.blacklist || DEFAULT_BLACKLIST).join("\n");
+  $("whitelist").value = (cfg.whitelist || []).join("\n");
   await renderChannels(cfg);
   await renderDiscover(cfg, "");
 }
@@ -55,13 +58,15 @@ async function renderChannels(cfg) {
     return;
   }
   const owned = channels.filter((c) => c.role === "owner");
-  const member = channels.filter((c) => c.role === "member");
+  const memberGroups = channels.filter((c) => c.role === "member" && c.isGroup);
+  const memberReadonly = channels.filter((c) => c.role === "member" && !c.isGroup);
+  const postable = [...owned, ...memberGroups];
 
-  if (owned.length === 0) {
+  if (postable.length === 0) {
     list.innerHTML = '<div class="channel-empty">Каналов пока нет. Создайте новый ниже.</div>';
   } else {
     const selected = new Set(cfg.autopostChannels || []);
-    for (const c of owned) {
+    for (const c of postable) {
       const row = document.createElement("label");
       row.className = "channel-item";
       const cb = document.createElement("input");
@@ -75,14 +80,39 @@ async function renderChannels(cfg) {
       meta.className = "channel-meta";
       meta.textContent = c.visibility === 0 ? "публичный" : "приватный";
       row.append(cb, name, meta);
+      if (c.isGroup) {
+        const groupBadge = document.createElement("span");
+        groupBadge.className = "channel-meta group";
+        groupBadge.textContent = c.role === "owner" ? "группа" : "группа · участник";
+        row.append(groupBadge);
+      }
+
+      if (c.role === "owner" && c.visibility === 1) {
+        const manageBtn = document.createElement("button");
+        manageBtn.type = "button";
+        manageBtn.className = "inline secondary";
+        manageBtn.textContent = openMemberPanels.has(c.id) ? "Скрыть" : "Участники";
+        manageBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (openMemberPanels.has(c.id)) openMemberPanels.delete(c.id);
+          else openMemberPanels.add(c.id);
+          renderChannels(cfg);
+        });
+        row.append(manageBtn);
+      }
+
       list.appendChild(row);
+
+      if (c.role === "owner" && c.visibility === 1 && openMemberPanels.has(c.id)) {
+        list.appendChild(renderMembersPanel(api, c, cfg));
+      }
     }
   }
 
-  if (member.length === 0) {
+  if (memberReadonly.length === 0) {
     subList.innerHTML = '<div class="channel-empty">Подписок пока нет. Найдите каналы ниже.</div>';
   } else {
-    for (const c of member) {
+    for (const c of memberReadonly) {
       const row = document.createElement("div");
       row.className = "channel-item";
       const name = document.createElement("span");
@@ -140,6 +170,13 @@ async function renderDiscover(cfg, query) {
     const meta = document.createElement("span");
     meta.className = "channel-meta";
     meta.textContent = "публичный";
+    row.append(name, meta);
+    if (c.isGroup) {
+      const gb = document.createElement("span");
+      gb.className = "channel-meta group";
+      gb.textContent = "группа";
+      row.append(gb);
+    }
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "inline";
@@ -156,9 +193,105 @@ async function renderDiscover(cfg, query) {
         flashStatus(`Ошибка: ${e.message}`, true);
       }
     });
-    row.append(name, meta, btn);
+    row.appendChild(btn);
     list.appendChild(row);
   }
+}
+
+function renderMembersPanel(api, channel, cfg) {
+  const panel = document.createElement("div");
+  panel.className = "members-panel";
+
+  const list = document.createElement("div");
+  list.className = "members-list";
+  list.textContent = "Загрузка…";
+  panel.appendChild(list);
+
+  const addRow = document.createElement("div");
+  addRow.className = "add-member-row";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "username";
+  input.maxLength = 64;
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "inline";
+  addBtn.textContent = "Добавить";
+  addRow.append(input, addBtn);
+  panel.appendChild(addRow);
+
+  const err = document.createElement("div");
+  err.className = "members-error";
+  panel.appendChild(err);
+
+  async function reload() {
+    err.textContent = "";
+    list.textContent = "Загрузка…";
+    let members;
+    try {
+      members = await api.listMembers(channel.id);
+    } catch (e) {
+      list.innerHTML = "";
+      err.textContent = `Ошибка загрузки: ${e.message}`;
+      return;
+    }
+    list.innerHTML = "";
+    if (members.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "member-empty";
+      empty.textContent = "Никого ещё не добавили.";
+      list.appendChild(empty);
+      return;
+    }
+    for (const m of members) {
+      const row = document.createElement("div");
+      row.className = "member-row";
+      const name = document.createElement("span");
+      name.className = "member-name";
+      name.textContent = "@" + m.username;
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "inline secondary";
+      rm.textContent = "Удалить";
+      rm.addEventListener("click", async () => {
+        rm.disabled = true;
+        try {
+          await api.removeMember(channel.id, m.userId);
+          await reload();
+        } catch (e) {
+          rm.disabled = false;
+          err.textContent = `Ошибка: ${e.message}`;
+        }
+      });
+      row.append(name, rm);
+      list.appendChild(row);
+    }
+  }
+
+  addBtn.addEventListener("click", async () => {
+    const username = input.value.trim();
+    if (!username) return;
+    addBtn.disabled = true;
+    err.textContent = "";
+    try {
+      await api.addMember(channel.id, username);
+      input.value = "";
+      await reload();
+    } catch (e) {
+      err.textContent = e instanceof ApiError && e.status === 404
+        ? "Пользователь не найден"
+        : `Ошибка: ${e.message}`;
+    } finally {
+      addBtn.disabled = false;
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); addBtn.click(); }
+  });
+
+  reload();
+  return panel;
 }
 
 function bindTabs() {
@@ -204,6 +337,20 @@ function bindAuth() {
   });
 }
 
+function bindVisibilityToggle() {
+  const hint = $("vis-hint");
+  const update = () => {
+    const v = document.querySelector('input[name="new-channel-visibility"]:checked')?.value;
+    hint.textContent = v === "0"
+      ? "Публичный: виден в поиске, любой может подписаться и читать визиты."
+      : "Приватный: только вы и приглашённые. Никто не найдёт через поиск.";
+  };
+  document.querySelectorAll('input[name="new-channel-visibility"]').forEach((r) => {
+    r.addEventListener("change", update);
+  });
+  update();
+}
+
 function bindMain() {
   $("open-feed").addEventListener("click", () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("feed.html") });
@@ -215,23 +362,28 @@ function bindMain() {
   });
 
   $("save").addEventListener("click", async () => {
-    const cbs = document.querySelectorAll(".channel-item input[type=checkbox]");
+    const cbs = document.querySelectorAll("#channel-list > .channel-item input[type=checkbox]");
     const selected = Array.from(cbs).filter((c) => c.checked).map((c) => c.value);
     const blacklist = $("blacklist").value
       .split("\n").map((l) => l.trim()).filter(Boolean);
-    await saveSettings(windowId, { autopostChannels: selected, blacklist });
-    flashStatus(`Сохранено: каналов — ${selected.length}, правил в чёрном списке — ${blacklist.length}`);
+    const whitelist = $("whitelist").value
+      .split("\n").map((l) => l.trim()).filter(Boolean);
+    await saveSettings(windowId, { autopostChannels: selected, blacklist, whitelist });
+    flashStatus(`Сохранено: каналов — ${selected.length}, whitelist — ${whitelist.length}, blacklist — ${blacklist.length}`);
   });
 
   $("new-channel-create").addEventListener("click", async () => {
     const name = $("new-channel-name").value.trim();
     if (!name) return;
-    const visibility = Number($("new-channel-visibility").value);
+    const visRadio = document.querySelector('input[name="new-channel-visibility"]:checked');
+    const visibility = Number(visRadio?.value ?? 1);
+    const isGroup = $("new-channel-is-group").checked;
     const cfg = await getConfig(windowId);
     const api = new ApiClient(cfg.apiBase, cfg.apiToken);
     try {
-      await api.createChannel(name, null, visibility);
+      await api.createChannel(name, null, visibility, isGroup);
       $("new-channel-name").value = "";
+      $("new-channel-is-group").checked = false;
       const fresh = await getConfig(windowId);
       await renderChannels(fresh);
       await renderDiscover(fresh, "");
@@ -271,4 +423,5 @@ function escapeHtml(s) {
 bindTabs();
 bindAuth();
 bindMain();
+bindVisibilityToggle();
 init();
