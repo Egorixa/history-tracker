@@ -37,6 +37,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Name).HasColumnName("name").HasMaxLength(128).IsRequired();
             e.Property(x => x.Description).HasColumnName("description").HasMaxLength(1024);
             e.Property(x => x.Visibility).HasColumnName("visibility").HasConversion<int>();
+            e.Property(x => x.IsGroup).HasColumnName("is_group").HasDefaultValue(false);
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.HasOne(x => x.Owner)
                 .WithMany(u => u.OwnedChannels)

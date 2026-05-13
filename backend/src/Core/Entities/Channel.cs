@@ -8,6 +8,7 @@ public class Channel
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public ChannelVisibility Visibility { get; set; }
+    public bool IsGroup { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
     public ICollection<ChannelMember> Members { get; set; } = new List<ChannelMember>();

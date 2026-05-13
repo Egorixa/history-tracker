@@ -22,18 +22,20 @@ public static class VisitEndpoints
             if (!UrlNormalizer.TryNormalize(req.Url, out var normalized))
                 return Results.BadRequest(new { error = "Invalid url" });
 
-            var ownedIds = await db.Channels
-                .Where(c => req.ChannelIds.Contains(c.Id) && c.OwnerId == userId)
+            var allowedIds = await db.Channels
+                .Where(c => req.ChannelIds.Contains(c.Id) && (
+                    c.OwnerId == userId
+                    || (c.IsGroup && db.ChannelMembers.Any(m => m.ChannelId == c.Id && m.UserId == userId))))
                 .Select(c => c.Id)
                 .ToListAsync(ct);
-            if (ownedIds.Count == 0)
+            if (allowedIds.Count == 0)
                 return Results.Forbid();
 
             var hash = UrlNormalizer.Hash(normalized);
             var now = DateTimeOffset.UtcNow;
             var titleClean = string.IsNullOrWhiteSpace(req.Title) ? null : req.Title.Trim();
 
-            foreach (var cid in ownedIds)
+            foreach (var cid in allowedIds)
             {
                 db.Visits.Add(new Visit
                 {

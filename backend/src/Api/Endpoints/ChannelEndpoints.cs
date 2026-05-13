@@ -20,14 +20,14 @@ public static class ChannelEndpoints
             var userId = CurrentUser.GetId(ctx.User);
             var owned = await db.Channels.AsNoTracking()
                 .Where(c => c.OwnerId == userId)
-                .Select(c => new ChannelResponse(c.Id, c.OwnerId, c.Name, c.Description, c.Visibility, c.CreatedAt, "owner"))
+                .Select(c => new ChannelResponse(c.Id, c.OwnerId, c.Name, c.Description, c.Visibility, c.IsGroup, c.CreatedAt, "owner"))
                 .ToListAsync(ct);
             var member = await db.ChannelMembers.AsNoTracking()
                 .Where(m => m.UserId == userId)
                 .Include(m => m.Channel)
                 .Select(m => new ChannelResponse(
                     m.Channel!.Id, m.Channel.OwnerId, m.Channel.Name, m.Channel.Description,
-                    m.Channel.Visibility, m.Channel.CreatedAt, "member"))
+                    m.Channel.Visibility, m.Channel.IsGroup, m.Channel.CreatedAt, "member"))
                 .ToListAsync(ct);
             return Results.Ok(owned.Concat(member));
         });
@@ -38,7 +38,7 @@ public static class ChannelEndpoints
             if (!string.IsNullOrWhiteSpace(query))
                 q = q.Where(c => EF.Functions.ILike(c.Name, $"%{query}%"));
             var list = await q.OrderBy(c => c.Name).Take(50)
-                .Select(c => new ChannelResponse(c.Id, c.OwnerId, c.Name, c.Description, c.Visibility, c.CreatedAt, "none"))
+                .Select(c => new ChannelResponse(c.Id, c.OwnerId, c.Name, c.Description, c.Visibility, c.IsGroup, c.CreatedAt, "none"))
                 .ToListAsync(ct);
             return Results.Ok(list);
         });
@@ -51,7 +51,7 @@ public static class ChannelEndpoints
             var role = c.OwnerId == userId ? "owner"
                 : await db.ChannelMembers.AnyAsync(m => m.ChannelId == id && m.UserId == userId, ct) ? "member"
                 : "public";
-            return Results.Ok(new ChannelResponse(c.Id, c.OwnerId, c.Name, c.Description, c.Visibility, c.CreatedAt, role));
+            return Results.Ok(new ChannelResponse(c.Id, c.OwnerId, c.Name, c.Description, c.Visibility, c.IsGroup, c.CreatedAt, role));
         });
 
         group.MapPost("/", async (CreateChannelRequest req, HttpContext ctx, AppDbContext db, CancellationToken ct) =>
@@ -65,13 +65,14 @@ public static class ChannelEndpoints
                 Name = req.Name.Trim(),
                 Description = req.Description,
                 Visibility = req.Visibility,
+                IsGroup = req.IsGroup,
                 CreatedAt = DateTimeOffset.UtcNow
             };
             db.Channels.Add(channel);
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/v1/channels/{channel.Id}",
                 new ChannelResponse(channel.Id, channel.OwnerId, channel.Name, channel.Description,
-                    channel.Visibility, channel.CreatedAt, "owner"));
+                    channel.Visibility, channel.IsGroup, channel.CreatedAt, "owner"));
         });
 
         group.MapPatch("/{id:guid}", async (Guid id, UpdateChannelRequest req, HttpContext ctx, AppDbContext db, CancellationToken ct) =>
@@ -83,6 +84,7 @@ public static class ChannelEndpoints
             if (!string.IsNullOrWhiteSpace(req.Name)) ch.Name = req.Name.Trim();
             if (req.Description is not null) ch.Description = req.Description;
             if (req.Visibility is not null) ch.Visibility = req.Visibility.Value;
+            if (req.IsGroup is not null) ch.IsGroup = req.IsGroup.Value;
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

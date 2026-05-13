@@ -6,14 +6,15 @@ public record RegisterRequest(string Username, string Password);
 public record LoginRequest(string Username, string Password);
 public record AuthResponse(Guid UserId, string Username, string ApiToken);
 
-public record CreateChannelRequest(string Name, string? Description, ChannelVisibility Visibility);
-public record UpdateChannelRequest(string? Name, string? Description, ChannelVisibility? Visibility);
+public record CreateChannelRequest(string Name, string? Description, ChannelVisibility Visibility, bool IsGroup = false);
+public record UpdateChannelRequest(string? Name, string? Description, ChannelVisibility? Visibility, bool? IsGroup);
 public record ChannelResponse(
     Guid Id,
     Guid OwnerId,
     string Name,
     string? Description,
     ChannelVisibility Visibility,
+    bool IsGroup,
     DateTimeOffset CreatedAt,
     string Role);
 
