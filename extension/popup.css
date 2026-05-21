@@ -190,3 +190,47 @@ textarea { resize: vertical; font-family: ui-monospace, monospace; font-size: 11
 
 .row { display: flex; gap: 6px; margin-top: 8px; }
 .row button { flex: 1; }
+
+.current-tab {
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: #fafafc;
+}
+.current-tab-url {
+  font-size: 11px;
+  color: #555;
+  word-break: break-all;
+  margin-bottom: 6px;
+  font-family: ui-monospace, monospace;
+}
+.current-tab button.inline { padding: 4px 8px; font-size: 11px; }
+
+.current-tab .chat-row {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  gap: 4px;
+  margin-top: 6px;
+}
+.current-tab .chat-row select {
+  padding: 4px 6px;
+  border: 1px solid #d0d0d8;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 11px;
+  margin: 0;
+}
+
+.visitors-block { margin-top: 8px; font-size: 11px; }
+.visitors-block .visitors-title { color: #444; font-weight: 600; margin-bottom: 4px; }
+.visitors-block .visitor-row {
+  display: flex;
+  gap: 6px;
+  padding: 2px 0;
+  border-top: 1px solid #f0f0f4;
+}
+.visitors-block .visitor-row:first-of-type { border-top: 0; }
+.visitors-block .visitor-name { color: #1e1e2e; font-weight: 600; }
+.visitors-block .visitor-meta { color: #888; margin-left: auto; }
+.visitors-block .visitors-empty { color: #999; }

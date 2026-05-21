@@ -1,0 +1,101 @@
+body { max-width: 960px; }
+
+.tool-card {
+  background: #fff;
+  border: 1px solid #e5e5ec;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.tool-card h2 { font-size: 16px; margin: 0 0 8px; }
+.tool-card h3 { font-size: 13px; margin: 14px 0 6px; color: #555; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.tool-card .row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+.tool-card input[type=file] { font: inherit; }
+
+.channel-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 6px;
+}
+.channel-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.channel-list .channel-empty {
+  padding: 8px;
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+}
+
+button {
+  padding: 8px 14px;
+  border: 0;
+  background: #5e81ff;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button.secondary { background: #eee; color: #333; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.progress { margin-top: 10px; }
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #eef0ff;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.progress-fill {
+  height: 100%;
+  background: #5e81ff;
+  width: 0%;
+  transition: width 120ms linear;
+}
+
+.diff-result { margin-top: 12px; }
+.diff-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.diff-col h4 { font-size: 12px; margin: 0 0 6px; color: #555; text-transform: uppercase; letter-spacing: 0.04em; }
+.diff-col .diff-count {
+  background: #eef0ff;
+  color: #3f4bd8;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+.diff-list {
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fafafc;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+  word-break: break-all;
+}
+.diff-list .diff-item {
+  padding: 3px 4px;
+  border-top: 1px solid #f0f0f4;
+}
+.diff-list .diff-item:first-child { border-top: 0; }
+.diff-list .diff-empty { color: #999; padding: 6px; text-align: center; font-family: inherit; }
+
+.status { color: #3f8a3a; font-size: 13px; min-height: 18px; margin: 8px 20px; }

@@ -39,6 +39,24 @@ a.ht-seen {
   padding-right: 2px !important;
 }
 
+.ht-chat-icon {
+  display: inline-block !important;
+  margin-left: 4px !important;
+  padding: 0 4px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  vertical-align: middle !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(94, 129, 255, 0.35) !important;
+  background: rgba(94, 129, 255, 0.08) !important;
+  user-select: none !important;
+  transition: background 120ms ease !important;
+}
+.ht-chat-icon:hover {
+  background: rgba(94, 129, 255, 0.22) !important;
+}
+
 .ht-tooltip {
   position: absolute;
   background: #1e1e2e;

@@ -139,3 +139,15 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .feed-body a:hover { text-decoration: underline; }
 .feed-title { font-weight: 600; margin-bottom: 2px; }
 .feed-url { font-size: 12px; color: #888; word-break: break-all; }
+
+.feed-chat {
+  margin-top: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #eef0ff;
+  color: #3f4bd8;
+  border: 1px solid #d6dcff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.feed-chat:hover { background: #d8def8; }

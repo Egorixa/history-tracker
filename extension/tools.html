@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>History Tracker — инструменты</title>
+  <link rel="stylesheet" href="feed.css">
+  <link rel="stylesheet" href="tools.css">
+</head>
+<body>
+  <header>
+    <h1>Инструменты</h1>
+    <div class="header-right">
+      <span id="user-badge" class="user-badge"></span>
+    </div>
+  </header>
+
+  <section id="auth-warning" class="hidden">
+    <p>Сначала войдите через всплывающее окно расширения.</p>
+  </section>
+
+  <section id="tools-section" class="hidden">
+
+    <article class="tool-card">
+      <h2>Импорт истории браузера из JSON</h2>
+      <p class="hint">
+        Загрузите файл с экспортом истории (формат расширений типа
+        «Chrome History Export»). Принимаются: массив объектов с полем
+        <code>url</code> (и опционально <code>title</code>), либо массив
+        строк-URL.
+      </p>
+      <p class="hint">
+        Применяются ваши текущие <b>белый</b> и <b>чёрный</b> списки из
+        popup. Дата каждого визита на сервере = «сейчас» — без bulk-эндпоинта
+        историческое время сохранить нельзя.
+      </p>
+
+      <div class="row">
+        <input type="file" id="import-file" accept=".json,application/json" />
+      </div>
+      <div id="import-summary" class="hint"></div>
+
+      <h3>Каналы назначения</h3>
+      <div id="import-channels" class="channel-list"></div>
+
+      <div class="row">
+        <button type="button" id="import-start" disabled>Импортировать</button>
+        <button type="button" id="import-stop" class="secondary hidden">Остановить</button>
+      </div>
+
+      <div id="import-progress" class="progress hidden">
+        <div class="progress-bar"><div id="import-bar" class="progress-fill"></div></div>
+        <div id="import-status" class="hint"></div>
+      </div>
+    </article>
+
+    <article class="tool-card">
+      <h2>Пересечение канала с импортированной историей</h2>
+      <p class="hint">
+        Загрузите JSON истории и выберите канал — посчитаем три множества:
+        что есть и там и там, что есть только в истории, что есть только в
+        канале. Сравнение по нормализованному URL.
+      </p>
+      <p class="hint">
+        Без bulk-эндпоинта приходится постранично выкачать визиты канала
+        (по 200 за запрос). Для крупных каналов — медленно.
+      </p>
+
+      <div class="row">
+        <input type="file" id="diff-file" accept=".json,application/json" />
+        <select id="diff-channel"></select>
+      </div>
+
+      <div class="row">
+        <button type="button" id="diff-start" disabled>Сравнить</button>
+      </div>
+
+      <div id="diff-progress" class="progress hidden">
+        <div id="diff-status" class="hint"></div>
+      </div>
+
+      <div id="diff-result" class="diff-result hidden">
+        <div class="diff-cols">
+          <div class="diff-col">
+            <h4>Общее <span class="diff-count" id="diff-count-both">0</span></h4>
+            <div class="diff-list" id="diff-list-both"></div>
+          </div>
+          <div class="diff-col">
+            <h4>Только в истории <span class="diff-count" id="diff-count-only-history">0</span></h4>
+            <div class="diff-list" id="diff-list-only-history"></div>
+          </div>
+          <div class="diff-col">
+            <h4>Только в канале <span class="diff-count" id="diff-count-only-channel">0</span></h4>
+            <div class="diff-list" id="diff-list-only-channel"></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <p class="status" id="status"></p>
+
+  <script src="url_normalizer.js"></script>
+  <script type="module" src="tools.js"></script>
+</body>
+</html>

@@ -89,6 +89,31 @@
     scheduleBatch();
   }
 
+  function buildChatIcon(anchor) {
+    const icon = document.createElement("span");
+    icon.className = "ht-chat-icon";
+    icon.textContent = "💬";
+    icon.title = "Обсудить эту ссылку в одном из ваших каналов";
+    icon.setAttribute("role", "button");
+    icon.setAttribute("aria-label", "Обсудить эту ссылку");
+    icon.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const href = anchor.href;
+      if (!isHttp(href)) return;
+      const label = (anchor.textContent || "").trim().slice(0, 80) || href;
+      const norm = normalize(href) || href;
+      const elementKey = "link:" + norm;
+      chrome.runtime.sendMessage({
+        type: "openChat",
+        url: href,
+        elementKey,
+        elementLabel: label
+      });
+    });
+    return icon;
+  }
+
   function buildBadge(visitors) {
     const badge = document.createElement("span");
     badge.className = "ht-badge";
@@ -119,6 +144,9 @@
 
     const badge = buildBadge(visitors);
     link.insertAdjacentElement("afterend", badge);
+
+    const chatIcon = buildChatIcon(link);
+    badge.insertAdjacentElement("afterend", chatIcon);
 
     attachHover(link, visitors);
     attachHover(badge, visitors);

@@ -53,6 +53,26 @@
         </section>
 
         <section id="main-section" class="hidden">
+            <h2>Текущая вкладка</h2>
+            <div id="current-tab" class="current-tab">
+                <div class="current-tab-url" id="current-tab-url">—</div>
+                <button
+                    type="button"
+                    id="post-current-tab"
+                    class="inline"
+                    title="Отправить эту страницу в каналы, отмеченные ниже. Чёрный/белый список игнорируются."
+                >
+                    Добавить эту страницу в каналы
+                </button>
+                <div class="chat-row">
+                    <select id="chat-channel-select"></select>
+                    <button type="button" id="open-chat" class="inline secondary">
+                        Открыть чат
+                    </button>
+                </div>
+                <div id="current-tab-visitors" class="visitors-block"></div>
+            </div>
+
             <h2>Мои каналы (автопостинг)</h2>
             <p class="hint">
                 Визиты автоматически уходят в отмеченные каналы: ваши + группы,
@@ -143,7 +163,18 @@
 
             <div class="row">
                 <button type="button" id="open-feed">Открыть ленту</button>
+                <button type="button" id="open-tools" class="secondary">
+                    Импорт истории
+                </button>
             </div>
+
+            <label class="group-toggle">
+                <input type="checkbox" id="global-login" />
+                <span
+                    title="Если включено, токен сохраняется глобально и новые окна логинятся автоматически."
+                    >Глобальный логин (один на все окна)</span
+                >
+            </label>
             <div class="row">
                 <button type="button" id="save">Сохранить</button>
                 <button type="button" id="logout" class="secondary">

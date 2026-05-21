@@ -113,6 +113,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const result = await bundle.api.lookup(msg.urls || []);
         return sendResponse({ ok: true, result });
       }
+      if (msg?.type === "openChat") {
+        const qs = new URLSearchParams();
+        if (msg.url) qs.set("url", msg.url);
+        if (msg.elementKey) qs.set("elementKey", msg.elementKey);
+        if (msg.elementLabel) qs.set("elementLabel", msg.elementLabel);
+        await chrome.tabs.create({
+          url: chrome.runtime.getURL("chat.html") + "?" + qs.toString()
+        });
+        return sendResponse({ ok: true });
+      }
       if (msg?.type === "ping") {
         if (!windowId) return sendResponse({ ok: false });
         const cfg = await getConfig(windowId);

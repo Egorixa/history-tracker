@@ -152,6 +152,21 @@ function renderItem(it) {
     a.className = "feed-url";
     a.textContent = it.data.url;
     body.appendChild(a);
+
+    const chatBtn = document.createElement("button");
+    chatBtn.type = "button";
+    chatBtn.className = "feed-chat";
+    chatBtn.textContent = "💬 Обсудить страницу";
+    chatBtn.addEventListener("click", () => {
+      const qs = new URLSearchParams({
+        channelId: currentChannelId,
+        url: it.data.url
+      });
+      chrome.tabs.create({
+        url: chrome.runtime.getURL("chat.html") + "?" + qs.toString()
+      });
+    });
+    body.appendChild(chatBtn);
   }
   wrap.appendChild(body);
   return wrap;

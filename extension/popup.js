@@ -1,7 +1,7 @@
 import { ApiClient, ApiError } from "./api.js";
 import {
   getConfig, getCurrentWindowId, saveAuth, clearAuth, saveSettings,
-  DEFAULT_API_BASE, DEFAULT_BLACKLIST
+  setGlobalLogin, DEFAULT_API_BASE, DEFAULT_BLACKLIST
 } from "./config.js";
 
 const openMemberPanels = new Set();
@@ -40,8 +40,120 @@ async function showMain(cfg) {
 
   $("blacklist").value = (cfg.blacklist || DEFAULT_BLACKLIST).join("\n");
   $("whitelist").value = (cfg.whitelist || []).join("\n");
+  $("global-login").checked = !!cfg.globalLoginEnabled;
   await renderChannels(cfg);
   await renderDiscover(cfg, "");
+  await renderCurrentTab(cfg);
+  await renderChatChannelSelect(cfg);
+}
+
+async function renderChatChannelSelect(cfg) {
+  const sel = $("chat-channel-select");
+  sel.innerHTML = "";
+  const api = new ApiClient(cfg.apiBase, cfg.apiToken);
+  let list;
+  try {
+    list = await api.myChannels();
+  } catch {
+    return;
+  }
+  if (!list || list.length === 0) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "Нет каналов";
+    sel.appendChild(opt);
+    sel.disabled = true;
+    $("open-chat").disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  $("open-chat").disabled = false;
+  for (const c of list) {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    const tag = c.role === "owner" ? "★" : "•";
+    opt.textContent = `${tag} ${c.name}`;
+    sel.appendChild(opt);
+  }
+}
+
+async function renderCurrentTab(cfg) {
+  const urlEl = $("current-tab-url");
+  const visitorsEl = $("current-tab-visitors");
+  const postBtn = $("post-current-tab");
+  visitorsEl.innerHTML = "";
+
+  const tab = await getActiveTab();
+  if (!tab || !tab.url || !/^https?:/i.test(tab.url)) {
+    urlEl.textContent = "Нет активной http(s)-вкладки";
+    postBtn.disabled = true;
+    return;
+  }
+  urlEl.textContent = tab.url;
+  postBtn.disabled = false;
+
+  const api = new ApiClient(cfg.apiBase, cfg.apiToken);
+  let visitors = [];
+  try {
+    const result = await api.lookup([tab.url]);
+    visitors = (result && result[tab.url]) || [];
+  } catch (e) {
+    visitorsEl.innerHTML = `<div class="visitors-empty">Не удалось узнать визитёров: ${escapeHtml(e.message)}</div>`;
+    return;
+  }
+  renderVisitorsList(visitorsEl, visitors);
+}
+
+function renderVisitorsList(container, visitors) {
+  container.innerHTML = "";
+  const title = document.createElement("div");
+  title.className = "visitors-title";
+  title.textContent = visitors.length === 0
+    ? "Здесь ещё никто из ваших подписок не был."
+    : visitors.length === 1
+      ? "Здесь был 1 человек:"
+      : `Здесь были ${visitors.length} чел.:`;
+  container.appendChild(title);
+  if (visitors.length === 0) return;
+
+  for (const v of visitors) {
+    const row = document.createElement("div");
+    row.className = "visitor-row";
+    const name = document.createElement("span");
+    name.className = "visitor-name";
+    name.textContent = "@" + (v.username || "?");
+    const meta = document.createElement("span");
+    meta.className = "visitor-meta";
+    const parts = [];
+    if (v.channelName) parts.push("#" + v.channelName);
+    if (v.lastVisitedAt) parts.push(formatRelative(v.lastVisitedAt));
+    meta.textContent = parts.join(" · ");
+    row.append(name, meta);
+    container.appendChild(row);
+  }
+}
+
+async function getActiveTab() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    return tab || null;
+  } catch {
+    return null;
+  }
+}
+
+function formatRelative(iso) {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return "";
+  const diff = Math.max(1, Math.round((Date.now() - t) / 1000));
+  if (diff < 60) return `${diff} сек назад`;
+  const m = Math.round(diff / 60);
+  if (m < 60) return `${m} мин назад`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} ч назад`;
+  const d = Math.round(h / 24);
+  if (d < 30) return `${d} д назад`;
+  return new Date(iso).toLocaleDateString();
 }
 
 async function renderChannels(cfg) {
@@ -356,14 +468,72 @@ function bindMain() {
     chrome.tabs.create({ url: chrome.runtime.getURL("feed.html") });
   });
 
+  $("open-tools").addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("tools.html") });
+  });
+
+  $("open-chat").addEventListener("click", async () => {
+    const channelId = $("chat-channel-select").value;
+    if (!channelId) {
+      flashStatus("Выберите канал для чата.", true);
+      return;
+    }
+    const tab = await getActiveTab();
+    if (!tab?.url || !/^https?:/i.test(tab.url)) {
+      flashStatus("Нет активной http(s)-вкладки.", true);
+      return;
+    }
+    const qs = new URLSearchParams({ channelId, url: tab.url });
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("chat.html") + "?" + qs.toString()
+    });
+  });
+
+  $("post-current-tab").addEventListener("click", async () => {
+    const btn = $("post-current-tab");
+    btn.disabled = true;
+    try {
+      const cfg = await getConfig(windowId);
+      const selected = currentlyCheckedChannels();
+      if (selected.length === 0) {
+        flashStatus("Сначала отметьте хотя бы один канал галочкой.", true);
+        return;
+      }
+      const tab = await getActiveTab();
+      if (!tab?.url || !/^https?:/i.test(tab.url)) {
+        flashStatus("Нет активной http(s)-вкладки.", true);
+        return;
+      }
+      const api = new ApiClient(cfg.apiBase, cfg.apiToken);
+      await api.postVisit(tab.url, tab.title ?? null, selected);
+      flashStatus(`Отправлено в ${selected.length} канал(а/ов).`);
+    } catch (e) {
+      flashStatus(`Ошибка: ${e.message}`, true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("global-login").addEventListener("change", async (e) => {
+    const enabled = e.target.checked;
+    const cfg = await getConfig(windowId);
+    await setGlobalLogin(enabled, {
+      apiToken: cfg.apiToken,
+      userId: cfg.userId,
+      username: cfg.username,
+    });
+    flashStatus(enabled
+      ? "Глобальный логин включён — другие окна будут логиниться сами."
+      : "Глобальный логин выключен.");
+  });
+
   $("logout").addEventListener("click", async () => {
     await clearAuth(windowId);
     showAuth();
   });
 
   $("save").addEventListener("click", async () => {
-    const cbs = document.querySelectorAll("#channel-list > .channel-item input[type=checkbox]");
-    const selected = Array.from(cbs).filter((c) => c.checked).map((c) => c.value);
+    const selected = currentlyCheckedChannels();
     const blacklist = $("blacklist").value
       .split("\n").map((l) => l.trim()).filter(Boolean);
     const whitelist = $("whitelist").value
@@ -405,6 +575,13 @@ function bindMain() {
       $("discover-search").click();
     }
   });
+}
+
+function currentlyCheckedChannels() {
+  const cbs = document.querySelectorAll(
+    "#channel-list > .channel-item input[type=checkbox]"
+  );
+  return Array.from(cbs).filter((c) => c.checked).map((c) => c.value);
 }
 
 function flashStatus(msg, isError = false) {

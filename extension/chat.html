@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>History Tracker — чат</title>
+  <link rel="stylesheet" href="feed.css">
+  <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1 id="chat-title">Чат</h1>
+      <div id="chat-subtitle" class="chat-subtitle"></div>
+    </div>
+    <div class="header-right">
+      <span id="user-badge" class="user-badge"></span>
+    </div>
+  </header>
+
+  <section id="auth-warning" class="hidden">
+    <p>Сначала войдите через всплывающее окно расширения.</p>
+  </section>
+
+  <section id="channel-picker" class="hidden">
+    <div class="chat-meta">
+      <div class="chat-url" id="picker-url">—</div>
+      <div class="chat-element hidden" id="picker-element"></div>
+      <div class="picker-row">
+        <label for="picker-select">Выберите канал для обсуждения:</label>
+        <select id="picker-select"></select>
+        <button type="button" id="picker-open">Открыть</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="chat-section" class="hidden">
+    <div class="chat-meta">
+      <div class="chat-url" id="chat-url">—</div>
+      <div class="chat-element hidden" id="chat-element"></div>
+      <div class="chat-channel" id="chat-channel"></div>
+    </div>
+
+    <div id="messages" class="messages">
+      <div class="messages-empty">Загрузка…</div>
+    </div>
+
+    <div class="composer">
+      <textarea id="msg-body" rows="3" maxlength="4096"
+        placeholder="Написать сообщение… (Enter — отправить, Shift+Enter — перенос)"></textarea>
+      <div class="composer-row">
+        <span class="hint" id="composer-hint"></span>
+        <button type="button" id="msg-send">Отправить</button>
+      </div>
+    </div>
+
+    <p class="status" id="status"></p>
+  </section>
+
+  <script type="module" src="chat.js"></script>
+</body>
+</html>

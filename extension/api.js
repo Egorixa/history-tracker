@@ -107,6 +107,30 @@ export class ApiClient {
       body: JSON.stringify({ urls })
     });
   }
+
+  listSiteThreads(channelId, { elementsOnly, limit } = {}) {
+    const qs = new URLSearchParams();
+    if (elementsOnly) qs.set("elementsOnly", "true");
+    if (limit) qs.set("limit", String(limit));
+    const tail = qs.toString() ? `?${qs}` : "";
+    return this._fetch(`/api/v1/channels/${channelId}/sites/threads${tail}`);
+  }
+
+  getSiteMessages(channelId, { url, elementKey, limit, before } = {}) {
+    const qs = new URLSearchParams();
+    qs.set("url", url);
+    if (elementKey) qs.set("elementKey", elementKey);
+    if (limit) qs.set("limit", String(limit));
+    if (before) qs.set("before", before);
+    return this._fetch(`/api/v1/channels/${channelId}/sites/messages?${qs}`);
+  }
+
+  postSiteMessage(channelId, { url, elementKey, elementLabel, body }) {
+    return this._fetch(`/api/v1/channels/${channelId}/sites/messages`, {
+      method: "POST",
+      body: JSON.stringify({ url, elementKey, elementLabel, body })
+    });
+  }
 }
 
 export class ApiError extends Error {
