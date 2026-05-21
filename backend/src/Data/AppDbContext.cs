@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<ChannelMember> ChannelMembers => Set<ChannelMember>();
     public DbSet<Visit> Visits => Set<Visit>();
     public DbSet<Post> Posts => Set<Post>();
+    public DbSet<SiteThread> SiteThreads => Set<SiteThread>();
+    public DbSet<SiteMessage> SiteMessages => Set<SiteMessage>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -106,6 +108,47 @@ public class AppDbContext : DbContext
                 .HasForeignKey(x => x.AuthorId)
                 .OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(x => new { x.ChannelId, x.CreatedAt });
+        });
+
+        b.Entity<SiteThread>(e =>
+        {
+            e.ToTable("site_threads");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.ChannelId).HasColumnName("channel_id");
+            e.Property(x => x.Url).HasColumnName("url").HasMaxLength(2048).IsRequired();
+            e.Property(x => x.UrlHash).HasColumnName("url_hash").IsRequired();
+            e.Property(x => x.ElementKey).HasColumnName("element_key").HasMaxLength(256);
+            e.Property(x => x.ElementLabel).HasColumnName("element_label").HasMaxLength(512);
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.Property(x => x.LastMessageAt).HasColumnName("last_message_at");
+            e.Property(x => x.MessageCount).HasColumnName("message_count").HasDefaultValue(0);
+            e.HasOne(x => x.Channel)
+                .WithMany(c => c.SiteThreads)
+                .HasForeignKey(x => x.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.ChannelId, x.UrlHash });
+            e.HasIndex(x => new { x.ChannelId, x.LastMessageAt });
+        });
+
+        b.Entity<SiteMessage>(e =>
+        {
+            e.ToTable("site_messages");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.ThreadId).HasColumnName("thread_id");
+            e.Property(x => x.AuthorId).HasColumnName("author_id");
+            e.Property(x => x.Body).HasColumnName("body").HasMaxLength(4096).IsRequired();
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.HasOne(x => x.Thread)
+                .WithMany(t => t.Messages)
+                .HasForeignKey(x => x.ThreadId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Author)
+                .WithMany()
+                .HasForeignKey(x => x.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.ThreadId, x.CreatedAt });
         });
     }
 }

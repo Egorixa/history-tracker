@@ -14,4 +14,5 @@ public class Channel
     public ICollection<ChannelMember> Members { get; set; } = new List<ChannelMember>();
     public ICollection<Visit> Visits { get; set; } = new List<Visit>();
     public ICollection<Post> Posts { get; set; } = new List<Post>();
+    public ICollection<SiteThread> SiteThreads { get; set; } = new List<SiteThread>();
 }

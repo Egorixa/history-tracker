@@ -47,3 +47,27 @@ public record LookupVisitor(
     Guid ChannelId,
     string ChannelName,
     DateTimeOffset LastVisitedAt);
+
+public record CreateSiteMessageRequest(
+    string Url,
+    string? ElementKey,
+    string? ElementLabel,
+    string Body);
+
+public record SiteThreadResponse(
+    Guid Id,
+    Guid ChannelId,
+    string Url,
+    string? ElementKey,
+    string? ElementLabel,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset LastMessageAt,
+    int MessageCount);
+
+public record SiteMessageResponse(
+    Guid Id,
+    Guid ThreadId,
+    Guid AuthorId,
+    string AuthorUsername,
+    string Body,
+    DateTimeOffset CreatedAt);

@@ -88,6 +88,7 @@ app.MapChannelEndpoints();
 app.MapVisitEndpoints();
 app.MapPostEndpoints();
 app.MapLookupEndpoints();
+app.MapSiteChatEndpoints();
 
 app.Run();
 
